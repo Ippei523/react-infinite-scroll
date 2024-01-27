@@ -1,7 +1,9 @@
-import { UserCreateOrUpdate} from '@/component/user_create_or_update';
+import { UserCreateOrUpdate} from '@/components/user_create_or_update';
 
-export const Page = () => {
+const Page = () => {
   return (
     <UserCreateOrUpdate pageType="create" />
   )
 }
+
+export default Page;
