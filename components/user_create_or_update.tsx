@@ -3,6 +3,7 @@ import { PAGE_URL, User } from "@/constant/const";
 import axios, { AxiosResponse } from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 
 interface UserCreateOrUpdateProps {
   pageType: 'create' | 'update'
@@ -13,22 +14,23 @@ export const UserCreateOrUpdate = ({ pageType }: UserCreateOrUpdateProps) => {
   const query = useSearchParams();
   const [name, setName] = useState('');
 
-  const fetchUser = async (id: string) => {
-    const response: AxiosResponse<User> = await axios.get(`${PAGE_URL}/users/${id}`);
+  const fetcher = async (key: string) => {
+    if (pageType === 'create') return;
+    const response: AxiosResponse<User> = await axios.get(PAGE_URL + key);
     return response.data;
   }
 
+  const { data, error, isLoading } = useSWR(`/users/${query.get('id')}`, fetcher);
+
   useEffect(() => {
-    (
-      async () => {
-        if (pageType === 'update') {
-          const user = await fetchUser(query.get('id') ?? "");
-          setName(user.name);
-        }
-      }
-    )();
+    if (pageType === 'update') {
+      setName(data?.name || '');
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data, pageType]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error...</div>;
 
   return (
     <div>
